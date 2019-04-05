@@ -1,0 +1,6 @@
+.terraform/
+*.generated
+out/
+.envrc
+kops/values-*.yaml
+environments.mk

@@ -1,0 +1,11 @@
+controller:
+  image:
+    tag: "0.22.0"
+  publishService:
+    enabled: true
+
+  service:
+    loadBalancerSourceRanges:
+     # Sets IP-restriction on Ingress.
+     # open to the whole world. dns-01 challenge mitigates this.
+     # - 37.139.156.40/32

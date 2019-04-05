@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: kube-system
+  name: aws-iam-authenticator
+  labels:
+    k8s-app: aws-iam-authenticator
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: "{{ .Values.name }}"
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+data:
+  config.yaml: | 
+    clusterID: {{ .Values.cluster_fqdn }}
+    server:
+      mapRoles:
+      - roleARN: arn:aws:iam::{{ .Values.aws_account_id }}:role/KubernetesAdmin
+        username: kubernetes-admin
+        groups:
+        - system:masters

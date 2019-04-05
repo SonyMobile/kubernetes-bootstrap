@@ -1,0 +1,10 @@
+aws:
+  zoneType: public
+
+extraArgs: {}
+  # dry-run: ''
+
+policy: sync
+
+rbac:
+  create: true

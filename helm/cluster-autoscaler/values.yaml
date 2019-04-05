@@ -1,0 +1,10 @@
+image:
+  # The version here is aligned with the current Kubernetes version, i.e 1.11.x
+  tag: v1.3.5
+rbac:
+  create: true
+nodeSelector:
+  node-role.kubernetes.io/master: ""
+tolerations:
+  - key: node-role.kubernetes.io/master
+    effect: NoSchedule

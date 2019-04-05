@@ -1,0 +1,14 @@
+alertmanager:
+  enabled: false
+
+pushgateway:
+  enabled: false
+
+server:
+  enabled: true
+
+  global:
+    scrape_interval: 30s
+
+  ingress:
+    enabled: true

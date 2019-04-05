@@ -1,0 +1,9 @@
+name: aws-iam-authenticator
+image:
+  repository: gcr.io/heptio-images/authenticator
+  tag: v0.1.0
+service:
+  clusterIP: ""
+
+aws_account_id: ""
+cluster_fqdn: ""

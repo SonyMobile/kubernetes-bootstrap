@@ -1,0 +1,26 @@
+kubernetesVersion: 1.11.8
+master:
+  machineType: t3.medium
+  availabilityZones: [ a, b, c ]
+  etcd:
+    encryptedVolume: true
+node:
+  machineType: t3.medium
+  minSize: 2
+  maxSize: 4
+  useSpotMarket: false
+  maxPrice: 0.50
+subnets:
+- availabilityZone: a
+  privateIpRange: 172.20.32.0/19
+  utilityIpRange: 172.20.0.0/22
+- availabilityZone: b
+  privateIpRange: 172.20.64.0/19
+  utilityIpRange: 172.20.4.0/22
+- availabilityZone: c
+  privateIpRange: 172.20.96.0/19
+  utilityIpRange: 172.20.8.0/22
+bastionCount: 0
+externalAccess:
+# Sets IP-restriction on API server and bastion hosts.
+- 37.139.156.40/32
