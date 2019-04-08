@@ -36,7 +36,7 @@ Internet gateways.  A second ELB is created by the Kubernetes Ingress Controller
 traffic to applications running on the cluster.  The master nodes run in an Auto-Scaling Group (ASG)
 of min and max size of 1.  This is to ensure that the nodes would be re-provisioned should the
 underlying instance go down.  The worker nodes also run in an ASG, the size of which is
-[configurable](cluster-spec/values.yaml).
+[configurable](kops/values.yaml).
 
 ![cluster](./docs/cluster.png)
 
@@ -133,7 +133,7 @@ The following steps will bring-up a new Kubernetes cluster.
 
    Deploys the [cluster autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler)
    that automatically adjusts the size (within the limits specified in the
-   [cluster spec](cluster-spec/cluster.tpl.yaml)) of the Kubenetes cluster based on resource needs.
+   [cluster spec](kops/cluster.tpl.yaml)) of the Kubenetes cluster based on resource needs.
    A good explanation on how the autoscaler works can be found in the
    [cluster autoscaler FAQ](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md).
 
@@ -162,7 +162,7 @@ to drain nodes on which such Pods are running and the upgrade will hang until it
 is to use `kubectl` to manually delete the Pod, causing it to be re-scheduled to an alternative, available
 node.
 
-1\. Update the [values file](./cluster-spec/values.yaml)
+1\. Update the [values file](./kops/values.yaml)
 
 2\. `make update-cluster`
 
@@ -197,7 +197,7 @@ instance count to 0 so it's not enabled by default.
 Do the following to launch a bastion host:
 
 ```
-# edit the cluster-spec/values.yaml file, set bastionCount value to 1
+# edit the kops/values.yaml file, set bastionCount value to 1
 $ make update-cluster
 ```
 
@@ -294,10 +294,10 @@ direnv: export +AWS_PROFILE +AWS_REGION +BASE_FQDN +ENVIRONMENT
 ```
 
 The individual values of the Kubernetes cluster spec used by kops can be customised for a particular
-installation through the file cluster-spec/values-${ENVIRONMENT}.yaml. For example:
+installation through the file kops/values-${ENVIRONMENT}.yaml. For example:
 
 ```
-$ cat cluster-spec/values-lab.yaml
+$ cat kops/values-lab.yaml
 master:
   machineType: t2.medium
 node:
