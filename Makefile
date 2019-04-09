@@ -61,26 +61,35 @@ define check_environment
 endef
 
 
-.PHONY: deploy-bootstrap
-deploy-bootstrap: checkenv-$(ENVIRONMENT) ## Deploys the bootstrap Terraform stack.
-	@echo "Deploying bootstrap to $(ENVIRONMENT)"
-	( cd terraform/bootstrap ; terraform init && \
-	  terraform apply -auto-approve \
-	    -state $(ENVIRONMENT)-terraform.tfstate \
-	    -var "aws_region=$(AWS_REGION)" \
-	    -var "bucket=$(TERRAFORM_STATE_BUCKET)" \
-	    -var "dynamodb_table=$(TERRAFORM_STATELOCK_TABLE)" )
+.PHONY: deploy-prereqs
+deploy-prereqs: checkenv-$(ENVIRONMENT) ## Creates the resources required by Terraform.
+	@echo "Deploying prereqs to $(ENVIRONMENT)"
+	aws s3api create-bucket --region $(AWS_REGION) --bucket $(TERRAFORM_STATE_BUCKET) \
+	  --create-bucket-configuration LocationConstraint=$(AWS_REGION) --output text
+	aws s3api put-bucket-versioning --bucket $(TERRAFORM_STATE_BUCKET) --versioning-configuration Status=Enabled
+	aws s3api put-bucket-encryption --bucket $(TERRAFORM_STATE_BUCKET) \
+	  --server-side-encryption-configuration '{"Rules": [{"ApplyServerSideEncryptionByDefault": {"SSEAlgorithm": "AES256"}}]}'
+	@echo "This is the Terraform state bucket for the cluster $(CLUSTER_FQDN)." | aws s3 cp - s3://$(TERRAFORM_STATE_BUCKET)/README
+	aws dynamodb create-table \
+	  --region us-west-2 \
+	  --table-name $(TERRAFORM_STATELOCK_TABLE) \
+	  --attribute-definitions AttributeName=LockID,AttributeType=S \
+	  --key-schema AttributeName=LockID,KeyType=HASH \
+	  --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 \
+	  --output text
 
 
-.PHONY: clean-bootstrap
-clean-bootstrap: checkenv-$(ENVIRONMENT) ## Removes the bootstrap resources.
-	@echo "Destoying bootstrap on $(ENVIRONMENT)"
-	( cd terraform/bootstrap ; terraform init && \
-	  terraform destroy \
-	    -state $(ENVIRONMENT)-terraform.tfstate \
-	    -var "aws_region=$(AWS_REGION)" \
-	    -var "bucket=$(TERRAFORM_STATE_BUCKET)" \
-	    -var "dynamodb_table=$(TERRAFORM_STATELOCK_TABLE)" )
+.PHONY: clean-prereqs
+clean-prereqs: checkenv-$(ENVIRONMENT) ## Removes the resources required by terraform.
+	@echo "Destoying prereqs on $(ENVIRONMENT)"
+	aws s3api delete-objects \
+	  --bucket $(TERRAFORM_STATE_BUCKET) \
+	  --delete "`aws s3api list-object-versions \
+	  --bucket $(TERRAFORM_STATE_BUCKET) \
+	  --output=json \
+	  --query='{Objects: [Versions,DeleteMarkers][].{Key:Key,VersionId:VersionId}}')`" --output text
+	aws s3api delete-bucket --region $(AWS_REGION) --bucket $(TERRAFORM_STATE_BUCKET) --output text
+	aws dynamodb delete-table --region $(AWS_REGION) --table-name $(TERRAFORM_STATELOCK_TABLE) --output text
 
 
 .PHONY: deploy-infra

@@ -82,14 +82,10 @@ The following steps will bring-up a new Kubernetes cluster.
      --query 'Role.Arn'
    ```
 
-2\. `make deploy-bootstrap`
+2\. `make deploy-prereqs`
 
-   Use this make target to create the Terraform local-state that is used to bootstrap Terraform
-   itself. This includes creating the Terraform state bucket on S3 and creating a DynamoDb table
-   used for to prevent concurrent deploys.  Terraform local state is used here to avoid the
-   :chicken: and :egg: situation that Terraform requires some AWS resources to work. This step
-   will create a terraform state file in the folder terraform/bootrap using the name
-   ${ENVIRONMENT}-terraform.tfstate.
+   Use this make target to create the resources required by Terraform. This includes creating the
+   Terraform state bucket on S3 and creating a DynamoDb table used for to prevent concurrent deploys.
 
 3\. `make deploy-infra`
 
@@ -181,14 +177,14 @@ node.
 
    Removes the infrastructure required by kops.
 
-3\. `make clean-bootstrap`
+3\. `make clean-prereqs`
 
    Removes the infrastructure required by Terraform.
 
 4\. `git clean -dfx`
 
    Always `git clean -dfx` before starting or after destroying a cluster (i.e. with
-   `make clean-<X>`) to ensure that local Terraform state files (`bootstrap/*terraform.tfstate`) are
+   `make clean-<X>`) to ensure that local Terraform state files (`terraform/infra/*terraform.tfstate`) are
    removed.  Otherwise creating a new cluster with the same parameters may fail due to stale local
    state.
 
@@ -281,10 +277,10 @@ You can also override ordinary environment variables such as `ENVIRONMENT` in th
 As an example, to create a 'lab' cluster for individual experimentation the `ENVIRONMENT` parameter may be overridden when calling `make`:
 
 ```
-$ make deploy-bootstrap ENVIRONMENT=lab
+$ make deploy-prereqs ENVIRONMENT=lab
 ```
 
-or, simply run `make deploy-bootstrap` if you have overridden `ENVIRONMENT` in the `environments.mk` file. Alternatively, if [direnv](https://direnv.net/) is installed as below.
+or, simply run `make deploy-prereqs` if you have overridden `ENVIRONMENT` in the `environments.mk` file. Alternatively, if [direnv](https://direnv.net/) is installed as below.
 
 ```
 $ cat .envrc
