@@ -33,6 +33,13 @@ resource "aws_s3_bucket" "kops_state_bucket" {
   }
 }
 
+resource "aws_s3_bucket_object" "readme" {
+  bucket = "${var.kops_state_store}"
+  key    = "README"
+  content = "This is the kops state bucket for the cluster ${var.cluster_fqdn}."
+  depends_on = ["aws_s3_bucket.kops_state_bucket"]
+}
+
 data "aws_route53_zone" "parent_hosted_zone" {
   name = "${var.base_fqdn}."
 }
