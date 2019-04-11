@@ -1,4 +1,4 @@
-# Kubernetes Cluster Bootstrap
+# Kubernetes Bootstrap
 
 This project facilitates bootstrapping a new Kubernetes cluster on AWS.
 
@@ -29,9 +29,9 @@ component.
 
 This project creates a high-availability Kubernetes cluster in which the master and worker nodes are
 spread across three availability zones (AZs) in a single region.  A new Virtual Private Cloud (VPC)
-is created with both private and pubilc subnets in each AZ.  An Elastic Load-Balancer (ELB) provides
+is created with both private and public subnets in each AZ.  An Elastic Load-Balancer (ELB) provides
 external access to the Kubernetes API server running on the master nodes.  All instances running
-Kubernetes are created inside the private subnets, with outbound internet access provided by NAT and
+Kubernetes are created inside the private subnets, with outbound Internet access provided by NAT and
 Internet gateways.  A second ELB is created by the Kubernetes Ingress Controller to route incoming
 traffic to applications running on the cluster.  The master nodes run in an Auto-Scaling Group (ASG)
 of min and max size of 1.  This is to ensure that the nodes would be re-provisioned should the
@@ -40,31 +40,18 @@ underlying instance go down.  The worker nodes also run in an ASG, the size of w
 
 ![cluster](./docs/cluster.png)
 
+
 ## Pre-requisites
 
-`docker`, `make`, `aws cli`, `terraform`, `kops`, `kubectl`, `helm` and `aws-iam-authenticator`
+- **Software on you local machine.** `docker`, `make`, `aws cli`, `terraform`, `kops`, `kubectl`, `helm` and `aws-iam-authenticator`
 should be installed and available in the shell search path.  Refer to their respective documentation
 for installation instructions specific to your OS.
-
-Before you deploy a cluster you might want to apply IP-restrictions to the external resources
-(to an office ip address for instance). IP-restrictions for the kubernetes API-server and the
-bastion host are configured in [kops/values.yaml](./kops/values.yaml) and IP-restrictions for
-any external facing services you deploy are configured in
-[helm/nginx-ingress/values.yaml](./helm/nginx-ingress/values.yaml).
-
-## Getting started
-
-The following steps will bring-up a new Kubernetes cluster.
-
-1\. Configure AWS credentials
-
-   Refer to the
+- **Configure AWS credentials.** Refer to the
    [AWS documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html).
    The [Makefile](./Makefile) checks that the correct AWS environment (region and account) is
-   configured for the environment.
-
-   Also, create an IAM role, named `KubernetesAdmin`, that users must assume for successful interaction
-   with the API Server.
+   configured for the environment (see [customization](#customization)).
+- **Configure IAM role**. If you plan to authenticate kubectl with an IAM user (optional) you need to create an IAM role,
+  named `KubernetesAdmin`, that users must assume for successful interaction with the API Server. This is done like so:
 
    ```
    # get your account ID
@@ -82,47 +69,52 @@ The following steps will bring-up a new Kubernetes cluster.
      --query 'Role.Arn'
    ```
 
-2\. `make deploy-prereqs`
+Before you deploy a cluster you might want to apply IP-restrictions to the external resources
+(to an office ip address for instance). IP-restrictions for the kubernetes API-server and the
+bastion host are configured in [kops/values.yaml](./kops/values.yaml) and IP-restrictions for
+any external facing services you deploy are configured in
+[helm/nginx-ingress/values.yaml](./helm/nginx-ingress/values.yaml).
+
+
+## Bring up a new Kubernetes cluster
+
+The following steps will bring up a new Kubernetes cluster.
+
+1\. `make deploy-prereqs`
 
    Use this make target to create the resources required by Terraform. This includes creating the
    Terraform state bucket on S3 and creating a DynamoDb table used for to prevent concurrent deploys.
 
-3\. `make deploy-infra`
+2\. `make deploy-infra`
 
    This make target deploys the infrastructure required by kops in order to create a Kubernetes
    cluster: an S3 bucket, in which to store the kops state; and, a Route53 hosted zone, delegated
    from a base zone, in which to register domain names used by the cluster.
 
-4\. `make deploy-cluster`
+3\. `make deploy-cluster`
 
    This target runs kops to create a new Kubernetes cluster.  This process takes time and, as
    indicated by the kops output, you need to wait until the cluster is up-and-running before
    proceeding to deploy applications.  Use the `validate-cluster` make target to determine whether
    a cluster is ready or not.
 
-5\. `make validate-cluster`
+4\. `make validate-cluster`
 
    Simply runs `kops validate cluster` with the correct arguments for the state store.
 
-6\. `make deploy-helm`
+5\. `make deploy-helm`
 
    Installs tiller (the helm agent) inside the Kubernetes cluster.  Ensure that the cluster is ready
    (by using the `validate-cluster` target above) before carrying out this step.
 
-7\. `make deploy-authenticator`
-
-   Packages and installs the AWS IAM Authenticator.  Ensure that Helm's tiller pod is running in the
-   cluster before running this step.  This step can be re-run whenever you change the
-   `configmap.yaml` containing the IAM user to Kubernetes user mapping.
-
-8\. `make deploy-nginx-ingress`
+6\. `make deploy-nginx-ingress`
 
    Creates an Ingress Controller, required for incoming traffic to reach applications running inside
    the cluster. We chose nginx as a simple Ingress Controller, but other brands are available. This
    step takes some time to complete in the background, as it creates both a Classic Elastic
    Load-Balancer on AWS.
 
-9\. `make deploy-external-dns`
+7\. `make deploy-external-dns`
 
    Installs ExternalDNS which will take care of creating DNS A records for the exposed Kubernetes
    services and ingresses. ExternalDNS is installed with `sync` policy which means that it
@@ -130,15 +122,7 @@ The following steps will bring-up a new Kubernetes cluster.
    records when you delete services or ingresses in the Kubernetes cluster, then change this value
    to `upsert-only`. See [extenal-dns](./docs/external-dns.md) for details.
 
-10\. `make deploy-autoscaler`
-
-   Deploys the [cluster autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler)
-   that automatically adjusts the size (within the limits specified in the
-   [cluster spec](kops/cluster.tpl.yaml)) of the Kubenetes cluster based on resource needs.
-   A good explanation on how the autoscaler works can be found in the
-   [cluster autoscaler FAQ](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md).
-
-11\. `make deploy-app-echoserver`
+8\. `make deploy-app-echoserver`
 
    This make target packages a simple application into a helm chart and deploys that chart to the
    cluster. The echoserver application is a web-server that displays the HTTP headers of the
@@ -146,6 +130,36 @@ The following steps will bring-up a new Kubernetes cluster.
    `kubectl get ingresses`. Though note that the wildcard DNS entry created in the previous step
    must have propagated through the DNS to the resolver on your local network before it will be
    reachable.
+
+
+## Additional targets
+
+- `make deploy-authenticator`
+
+   Packages and installs the AWS IAM Authenticator.  Ensure that Helm's tiller pod is running in the
+   cluster before running this step.  This step can be re-run whenever you change the
+   `configmap.yaml` containing the IAM user to Kubernetes user mapping.
+
+- `make deploy-autoscaler`
+
+   Deploys the [cluster autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler)
+   that automatically adjusts the size (within the limits specified in the
+   [cluster spec](kops/cluster.tpl.yaml)) of the Kubernetes cluster based on resource needs.
+   A good explanation on how the autoscaler works can be found in the
+   [cluster autoscaler FAQ](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md).
+
+- `make deploy-metrics-server`
+
+   Deploys the [metrics server](https://github.com/kubernetes-incubator/metrics-server) that allows for using
+   the kubectl top command (shows pod metrics).
+
+- `make deploy-prometheus`
+
+   Deploys [prometheus](https://prometheus.io/) that is used storing metrics that can be visualized with Grafana.
+
+- `make deploy-grafana`
+
+   Deploys [grafana](https://grafana.com/) that is used for visualizing platform metrics.
 
 
 ## Updating / upgrading the cluster
@@ -166,6 +180,7 @@ node.
 1\. Update the [values file](./kops/values.yaml)
 
 2\. `make update-cluster`
+
 
 ## Tear-down
 
@@ -224,17 +239,19 @@ or nodes instances by using their local IP address.
 
 More details can be found here: https://github.com/kubernetes/kops/blob/master/docs/bastion.md
 
+
 ## Metrics
 
-Memory and CPU utilisation metrics for both nodes and pods are available via Kubernetes'
+Memory and CPU utilization metrics for both nodes and pods are available via Kubernetes'
 [metrics pipeline](https://kubernetes.io/docs/tasks/debug-application-cluster/core-metrics-pipeline/).
 This requires the Kubernetes Metrics Server be deployed in the cluster, which is done via the make
 target `deploy-metrics-server`.  It is then possible to see information about either pods or nodes
 with `kubectl top pods` or `kubectl top nodes` respectively.
 
-## Customisation
 
-The [Makefile](./Makefile) is parameterised.  The following parameters can be customised either by
+## Customization
+
+The [Makefile](./Makefile) is parameterized.  The following parameters can be customized either by
 overriding their value on the make command line or by exporting them in the shell.
 Using [direnv](https://direnv.net/) can make this quite frictionless.
 
@@ -306,6 +323,7 @@ node:
   useSpotMarket: true
   maxPrice: 0.50
 ```
+
 
 ## Misc utilities
 
