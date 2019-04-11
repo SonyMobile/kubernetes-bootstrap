@@ -1,16 +1,38 @@
+## kops configuration
+
+## The kubernetes version to deploy
 kubernetesVersion: 1.11.8
+
+## Configuration for the masters instance group
 master:
+  ## Instance type for the masters
   machineType: t3.medium
+  ## A list of availability zones to use for the masters.
+  ## Note that not all regions have a, b and c available. Also
+  ## you might want to only use one region during development
+  ## to keep the costs down.
   availabilityZones: [ a, b, c ]
   etcd:
+    ## Controls whether the etcd volumes should be encrypted
     encryptedVolume: true
+
+## Configuration for the nodes instance group
 node:
+  ## Instance type for the nodes
   machineType: t3.medium
+  ## Min size for the nodes autoscaling group
   minSize: 2
+  ## Max size for the nodes autoscaling group
   maxSize: 4
+  ## Set this to true if you want to utilize spot instances
   useSpotMarket: false
+  ## The bid for the spot instances
   maxPrice: 0.50
+
+## Configuration for the nodes instance group
 subnets:
+## Configures the IP address ranges (CIDR) to use for the private
+## and utility (used for bastions) subnets respectively for the regions used.
 - availabilityZone: a
   privateIpRange: 172.20.32.0/19
   utilityIpRange: 172.20.0.0/22
@@ -20,9 +42,12 @@ subnets:
 - availabilityZone: c
   privateIpRange: 172.20.96.0/19
   utilityIpRange: 172.20.8.0/22
+
+## Number of bastion hosts (if any)
 bastionCount: 0
-externalAccess:
+
 ## Sets IP-restrictions on API server and bastion hosts.
 ## Default setting is unrestricted.
+externalAccess:
 # - 192.0.2.0/24
 - 0.0.0.0/0
