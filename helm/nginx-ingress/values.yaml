@@ -6,6 +6,7 @@ controller:
 
   service:
     loadBalancerSourceRanges:
-     # Sets IP-restriction on Ingress.
-     # open to the whole world. dns-01 challenge mitigates this.
-     # - 37.139.156.40/32
+     ## Sets IP-restrictions on the Ingress load balancer.
+     ## Default setting is unrestricted.
+     # - 192.0.2.0/24
+     - 0.0.0.0/0

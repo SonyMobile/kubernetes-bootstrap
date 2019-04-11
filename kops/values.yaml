@@ -22,5 +22,7 @@ subnets:
   utilityIpRange: 172.20.8.0/22
 bastionCount: 0
 externalAccess:
-# Sets IP-restriction on API server and bastion hosts.
-- 37.139.156.40/32
+## Sets IP-restrictions on API server and bastion hosts.
+## Default setting is unrestricted.
+# - 192.0.2.0/24
+- 0.0.0.0/0
