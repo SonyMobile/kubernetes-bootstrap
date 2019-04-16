@@ -46,6 +46,11 @@ underlying instance go down.  The worker nodes also run in an ASG, the size of w
 should be installed and available in the shell search path.  Refer to their respective documentation
 for installation instructions specific to your OS.
 
+Before you deploy a cluster you might want to apply IP-restrictions to the external resources
+(to an office ip address for instance). IP-restrictions for the kubernetes API-server and the
+bastion host are configured in [kops/values.yaml](./kops/values.yaml) and IP-restrictions for
+any external facing services you deploy are configured in
+[helm/nginx-ingress/values.yaml](./helm/nginx-ingress/values.yaml).
 
 ## Getting started
 
