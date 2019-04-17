@@ -63,7 +63,7 @@ endef
 
 .PHONY: deploy-prereqs
 deploy-prereqs: checkenv-$(ENVIRONMENT) ## Creates the resources required by Terraform.
-	@echo "Deploying prereqs to $(ENVIRONMENT)"
+	@echo "Deploying prereqs to $(CLUSTER_FQDN)"
 	aws s3api create-bucket --region $(AWS_REGION) --bucket $(TERRAFORM_STATE_BUCKET) \
 	  --create-bucket-configuration LocationConstraint=$(AWS_REGION) --output text
 	aws s3api put-bucket-versioning --bucket $(TERRAFORM_STATE_BUCKET) --versioning-configuration Status=Enabled
@@ -81,7 +81,7 @@ deploy-prereqs: checkenv-$(ENVIRONMENT) ## Creates the resources required by Ter
 
 .PHONY: clean-prereqs
 clean-prereqs: checkenv-$(ENVIRONMENT) ## Removes the resources required by terraform.
-	@echo "Destoying prereqs on $(ENVIRONMENT)"
+	@echo "Destoying prereqs on $(CLUSTER_FQDN)"
 	aws s3api delete-objects \
 	  --bucket $(TERRAFORM_STATE_BUCKET) \
 	  --delete "`aws s3api list-object-versions \
@@ -94,7 +94,7 @@ clean-prereqs: checkenv-$(ENVIRONMENT) ## Removes the resources required by terr
 
 .PHONY: deploy-infra
 deploy-infra: checkenv-$(ENVIRONMENT) ## Deploys the infrastructure required by kops in order to create a Kubernetes cluster.
-	@echo "Deploying infra to $(ENVIRONMENT)"
+	@echo "Deploying infra to $(CLUSTER_FQDN)"
 	( cd terraform/infra ; \
 	  terraform init \
 	    -backend-config="region=$(AWS_REGION)" \
@@ -110,7 +110,7 @@ deploy-infra: checkenv-$(ENVIRONMENT) ## Deploys the infrastructure required by 
 
 .PHONY: clean-infra
 clean-infra: checkenv-$(ENVIRONMENT) ## Removes the infrastructure resources.
-	@echo "Destroying infra on $(ENVIRONMENT)"
+	@echo "Destroying infra on $(CLUSTER_FQDN)"
 	( cd terraform/infra ; \
 	  terraform init \
 	    -backend-config="region=$(AWS_REGION)" \
@@ -137,7 +137,7 @@ $(CLUSTER_SPEC): $(OUTDIR)
 
 .PHONY: deploy-cluster
 deploy-cluster: checkenv-$(ENVIRONMENT) $(OUTDIR) $(CLUSTER_SPEC) ## Creates a new Kubernetes cluster using kops.
-	@echo "Deploying cluster to $(ENVIRONMENT)"
+	@echo "Deploying cluster to $(CLUSTER_FQDN)"
 	(cd $(OUTDIR) && aws-iam-authenticator init -i $(CLUSTER_FQDN))
 	aws s3 cp $(OUTDIR)/cert.pem s3://$(KOPS_STATE_BUCKET)/$(CLUSTER_FQDN)/addons/authenticator/cert.pem
 	aws s3 cp $(OUTDIR)/key.pem s3://$(KOPS_STATE_BUCKET)/$(CLUSTER_FQDN)/addons/authenticator/key.pem
