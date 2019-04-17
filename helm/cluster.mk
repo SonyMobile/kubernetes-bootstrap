@@ -27,7 +27,7 @@ nginx-ingress_CHARTVALUES = "tcp.9090=default/$(ENVIRONMENT)-prometheus-server:9
 deploy-nginx-ingress: helm-stable-install-nginx-ingress ## Deploys or upgrades the NGINX Ingress Controller.
 
 
-external-dns_CHARTVER := 1.0.2
+external-dns_CHARTVER := 1.7.3
 external-dns_CHARTVALUES = aws.region=$(AWS_REGION),$\
 	domainFilters[0]=$(CLUSTER_FQDN),$\
 	txtOwnerId=$(CLUSTER_FQDN)
