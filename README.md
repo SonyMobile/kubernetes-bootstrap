@@ -196,12 +196,10 @@ node.
 
    Removes the infrastructure required by Terraform.
 
-4\. `git clean -dfx`
+4\. Remove local terraform  state file
 
-   Always `git clean -dfx` before starting or after destroying a cluster (i.e. with
-   `make clean-<X>`) to ensure that local Terraform state files (`terraform/infra/*terraform.tfstate`) are
-   removed.  Otherwise creating a new cluster with the same parameters may fail due to stale local
-   state.
+   Remove the local Terraform state file (`terraform/infra/.terraform/terraform.tfstate`).  Otherwise
+   creating a new cluster with the same parameters may fail due to stale local state.
 
 
 ## Bastion
@@ -324,6 +322,16 @@ node:
   maxPrice: 0.50
 ```
 
+Using the same principle, you can customize values of any helm chart by creating a values-${ENVIRONMENT}.yaml file in that chart. For
+example (to try out a specific nginx-ingress image in the lab setup):
+
+```
+$ cat helm/nginx-ingress/values-lab.yaml
+controller:
+  image:
+    tag: "0.23.0"
+```
+
 
 ## Misc utilities
 
@@ -337,3 +345,8 @@ If you would like to manage a cluster that was not originally set up on your mac
 `make export-kubecfg` to create a kube context that lets you use `kubectl` towards that cluster. Be
 sure to set the environment variables to match the target environment, i.e. ENVIRONMENT and
 BASE_FQDN.
+
+
+## License
+
+This project is licensed under the Apache License, Version 2.0 - see the [LICENSE](LICENSE) file for details
