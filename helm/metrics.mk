@@ -17,13 +17,13 @@ metrics-server_CHARTVER := 2.6.0
 deploy-metrics-server: helm-stable-install-metrics-server ## Deploys or upgrades the metrics server.
 
 
-prometheus_CHARTVER := 7.4.0
+prometheus_CHARTVER := 8.10.3
 prometheus_CHARTVALUES = "server.ingress.hosts[0]=prometheus.$(CLUSTER_FQDN)"
 .PHONY: deploy-prometheus
 deploy-prometheus: helm-stable-install-prometheus ## Deploys or upgrades prometheus.
 
 
-grafana_CHARTVER := 1.17.4
+grafana_CHARTVER := 3.3.4
 grafana_CHARTVALUES = ingress.hosts[0]=grafana.$(CLUSTER_FQDN),$\
 	datasources.datasources\\.yaml.datasources[0].url=http://$(ENVIRONMENT)-prometheus-server
 .PHONY: deploy-grafana
