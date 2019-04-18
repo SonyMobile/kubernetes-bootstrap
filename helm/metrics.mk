@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-metrics-server_CHARTVER := 1.1.0
+metrics-server_CHARTVER := 2.6.0
 .PHONY: deploy-metrics-server
 deploy-metrics-server: helm-stable-install-metrics-server ## Deploys or upgrades the metrics server.
 
