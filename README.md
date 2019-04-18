@@ -140,6 +140,11 @@ The following steps will bring up a new Kubernetes cluster.
    cluster before running this step.  This step can be re-run whenever you change the
    `configmap.yaml` containing the IAM user to Kubernetes user mapping.
 
+- `make deploy-kube2iam`
+
+   Deploys [kube2iam](https://github.com/jtblin/kube2iam) that enables the use of individual IAM roles per pod. This is
+   recommended if a pod requires access to AWS resources.
+
 - `make deploy-autoscaler`
 
    Deploys the [cluster autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler)
