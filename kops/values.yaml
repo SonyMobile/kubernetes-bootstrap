@@ -1,7 +1,7 @@
 ## kops configuration
 
 ## The kubernetes version to deploy
-kubernetesVersion: 1.11.9
+kubernetesVersion: 1.12.7
 
 ## Configuration for the masters instance group
 master:
