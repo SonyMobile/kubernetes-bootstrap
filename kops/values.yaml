@@ -29,6 +29,19 @@ node:
   ## The bid for the spot instances
   maxPrice: 0.50
 
+## Configuration for the spot instance group
+spot:
+  ## Instance type for the spot nodes
+  machineType: t3.medium
+  ## Min size for the spot nodes autoscaling group
+  minSize: 0
+  ## Max size for the spot nodes autoscaling group
+  maxSize: 4
+  ## Set this to true if you want to utilize spot instances
+  useSpotMarket: true
+  ## The bid for the spot instances
+  maxPrice: 0.50
+
 ## Configuration for the nodes instance group
 subnets:
 ## Configures the IP address ranges (CIDR) to use for the private

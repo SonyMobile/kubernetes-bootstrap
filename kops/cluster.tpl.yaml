@@ -201,3 +201,29 @@ spec:
 {{- if .node.useSpotMarket }}
   maxPrice: "{{ .node.maxPrice }}"
 {{- end}}
+
+---
+
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  name: spots
+  labels:
+    kops.k8s.io/cluster: {{.clusterFqdn}}
+spec:
+  role: Node
+  nodeLabels:
+    kops.k8s.io/instancegroup: spots
+  cloudLabels:
+    k8s.io/cluster-autoscaler/enabled:
+    kubernetes.io/cluster/{{.clusterFqdn}}:
+  subnets:
+{{- range .subnets }}
+  - {{ $.awsRegion }}{{ .availabilityZone }}
+{{- end }}
+  machineType: {{.spot.machineType}}
+  minSize: {{.spot.minSize}}
+  maxSize: {{.spot.maxSize}}
+{{- if .spot.useSpotMarket }}
+  maxPrice: "{{ .spot.maxPrice }}"
+{{- end}}
