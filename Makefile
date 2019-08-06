@@ -71,7 +71,7 @@ deploy-prereqs: checkenv-$(ENVIRONMENT) ## Creates the resources required by Ter
 	  --server-side-encryption-configuration '{"Rules": [{"ApplyServerSideEncryptionByDefault": {"SSEAlgorithm": "AES256"}}]}'
 	@echo "This is the Terraform state bucket for the cluster $(CLUSTER_FQDN)." | aws s3 cp - s3://$(TERRAFORM_STATE_BUCKET)/README
 	aws dynamodb create-table \
-	  --region us-west-2 \
+	  --region $(AWS_REGION) \
 	  --table-name $(TERRAFORM_STATELOCK_TABLE) \
 	  --attribute-definitions AttributeName=LockID,AttributeType=S \
 	  --key-schema AttributeName=LockID,KeyType=HASH \
