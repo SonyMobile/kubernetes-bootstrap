@@ -68,6 +68,7 @@ for installation instructions specific to your OS.
      --output text \
      --query 'Role.Arn'
    ```
+- **Configure your environment**. Specify AWS region, base fqdn and a name for your cluster. See [customization](#customization).
 
 Before you deploy a cluster you might want to apply IP-restrictions to the external resources
 (to an office ip address for instance). IP-restrictions for the kubernetes API-server and the
@@ -143,7 +144,8 @@ The following steps will bring up a new Kubernetes cluster.
 - `make deploy-kube2iam`
 
    Deploys [kube2iam](https://github.com/jtblin/kube2iam) that enables the use of individual IAM roles per pod. This is
-   recommended if a pod requires access to AWS resources.
+   recommended if a pod requires access to AWS resources. Additional configuration (not yet in this project) is required to
+   make ExternalDNS and cluster autoscaler run with kube2iam.
 
 - `make deploy-autoscaler`
 
@@ -160,11 +162,13 @@ The following steps will bring up a new Kubernetes cluster.
 
 - `make deploy-prometheus`
 
-   Deploys [prometheus](https://prometheus.io/) that is used storing metrics that can be visualized with Grafana.
+   Deploys [prometheus](https://prometheus.io/) that is used for storing metrics that can be visualized with Grafana. Default configuration
+   has an ingress enabled. Can be modified in the [values file](./helm/prometheus/values.yaml).
 
 - `make deploy-grafana`
 
-   Deploys [grafana](https://grafana.com/) that is used for visualizing platform metrics.
+   Deploys [grafana](https://grafana.com/) that is used for visualizing platform metrics. Default configuration has no ingress enabled. Can
+   be modified in the [values file](./helm/grafana/values.yaml).
 
 
 ## Updating / upgrading the cluster
@@ -350,6 +354,13 @@ If you would like to manage a cluster that was not originally set up on your mac
 `make export-kubecfg` to create a kube context that lets you use `kubectl` towards that cluster. Be
 sure to set the environment variables to match the target environment, i.e. ENVIRONMENT and
 BASE_FQDN.
+
+
+## Final notes
+
+While this project brings up a high-availability Kubernetes cluster it is not entirely production ready for other reasons. It needs some
+hardening here and there. Tiller is deployed with an insecure 'allow unauthenticated users' policy for intance. There are a lot of public
+resources describing steps to take to make a Kubernetes cluster production ready.
 
 
 ## License
