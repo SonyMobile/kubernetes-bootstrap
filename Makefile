@@ -166,7 +166,11 @@ clean-cluster: checkenv-$(ENVIRONMENT) ## Tears-down the Kubernetes cluster.
 
 .PHONY: validate-cluster
 validate-cluster: checkenv-$(ENVIRONMENT) ## Checks whether the Kubernetes cluster is ready for use.
-	$(KOPS) --name $(CLUSTER_FQDN) validate cluster
+	@$(KOPS) --name $(CLUSTER_FQDN) validate cluster; \
+	if [ "$$?" = "1" ] ; then \
+	  echo "The API server is likely not ready yet. Please try again later."; \
+	  exit 1; \
+	fi
 
 
 .PHONY: update-cluster
