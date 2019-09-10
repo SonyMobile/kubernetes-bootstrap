@@ -363,6 +363,16 @@ hardening here and there. Tiller is deployed with an insecure 'allow unauthentic
 resources describing steps to take to make a Kubernetes cluster production ready.
 
 
+## Authors
+
+* [@andersgoransson-sony](https://github.com/andersgoransson-sony)
+* [@andershammar1](https://github.com/andershammar1)
+* [@boivie-at-sony](https://github.com/boivie-at-sony)
+* [@dolwitz-at-sony](https://github.com/dolwitz-at-sony)
+* [@felixhall](https://github.com/felixhall)
+* [@somcsel](https://github.com/somcsel)
+
+
 ## License
 
 This project is licensed under the Apache License, Version 2.0 - see the [LICENSE](LICENSE) file for details
